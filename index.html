@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Status Inicial SBC</title>
+
+<style>
+:root{
+  --azul:#002060;
+  --azul2:#0070c0;
+  --verde:#00a651;
+  --roxo:#7030a0;
+  --vermelho:#c00000;
+  --cinza:#f4f6f8;
+  --borda:#d9e2ec;
+  --amarelo:#fff2cc;
+  --texto:#1f2933;
+}
+
+*{
+  box-sizing:border-box;
+  font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+  margin:0;
+  background:var(--cinza);
+  color:var(--texto);
+}
+
+header{
+  background:var(--azul);
+  color:white;
+  padding:16px;
+  text-align:center;
+  font-size:22px;
+  font-weight:bold;
+}
+
+nav{
+  position:sticky;
+  top:0;
+  z-index:10;
+  background:white;
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding:10px;
+  border-bottom:1px solid var(--borda);
+}
+
+nav button{
+  white-space:nowrap;
+  background:#e5e7eb;
+  color:#111827;
+  border:none;
+  padding:10px 14px;
+  border-radius:20px;
+  font-weight:bold;
+}
+
+nav button.ativo{
+  background:var(--azul2);
+  color:white;
+}
+
+main{
+  max-width:1000px;
+  margin:0 auto;
+  padding:14px;
+}
+
+.tela{
+  display:none;
+}
+
+.tela.ativa{
+  display:block;
+}
+
+.card{
+  background:white;
+  border-radius:14px;
+  padding:16px;
+  margin-bottom:16px;
+  border:1px solid var(--borda);
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+
+.card h2{
+  margin-top:0;
+  color:var(--azul);
+  border-bottom:1px solid var(--borda);
+  padding-bottom:8px;
+  font-size:19px;
+}
+
+label{
+  display:block;
+  font-weight:bold;
+  margin-top:12px;
+  margin-bottom:5px;
+}
+
+input, select, textarea{
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #cbd5e1;
+  font-size:15px;
+}
+
+textarea{
+  min-height:90px;
+  resize:vertical;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+
+.linha{
+  display:grid;
+  grid-template-columns:1.1fr 1.2fr 1fr 1.4fr auto;
+  gap:8px;
+  margin-bottom:8px;
+}
+
+.linha-pendencia{
+  display:grid;
+  grid-template-columns:1fr .7fr 1.5fr .7fr auto;
+  gap:8px;
+  margin-bottom:8px;
+}
+
+button{
+  border:none;
+  border-radius:10px;
+  padding:13px 16px;
+  font-weight:bold;
+  cursor:pointer;
+  font-size:15px;
+}
+
+.btn-azul{background:var(--azul2);color:white;}
+.btn-verde{background:var(--verde);color:white;}
+.btn-roxo{background:var(--roxo);color:white;}
+.btn-vermelho{background:var(--vermelho);color:white;}
+.btn-cinza{background:#64748b;color:white;}
+
+.acoes{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:10px;
+}
+
+#resultado{
+  background:var(--amarelo);
+  white-space:pre-wrap;
+  min-height:300px;
+  padding:14px;
+  border-radius:12px;
+  border:1px solid #facc15;
+  line-height:1.45;
+}
+
+.resumo{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+
+.kpi{
+  background:#f8fafc;
+  border:1px solid var(--borda);
+  padding:14px;
+  border-radius:12px;
+  text-align:center;
+}
+
+.kpi strong{
+  display:block;
+  font-size:24px;
+  color:var(--azul);
+}
+
+@media(max-width:720px){
+  header{font-size:18px;}
+  main{padding:10px;}
+  .grid,.acoes,.linha,.linha-pendencia,.resumo{
+    grid-template-columns:1fr;
+  }
+  button{
+    width:100%;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>STATUS INICIAL SBC</header>
+
+<nav>
+  <button class="ativo" onclick="abrirTela('home', this)">🏠 Home</button>
+  <button onclick="abrirTela('programacao', this)">📌 Programação</button>
+  <button onclick="abrirTela('maoobra', this)">👷 Mão de Obra</button>
+  <button onclick="abrirTela('armazem', this)">🏭 Armazém</button>
+  <button onclick="abrirTela('pendencias', this)">🚚 Pendências</button>
+  <button onclick="abrirTela('resultadoTela', this)">📧 Resultado</button>
+</nav>
+
+<main>
+
+<section id="home" class="tela ativa">
+  <div class="card">
+    <h2>🏠 Home</h2>
+    <p>Preencha as etapas abaixo e gere automaticamente o status inicial da operação.</p>
+
+    <div class="resumo">
+      <div class="kpi">
+        <span>Data</span>
+        <strong id="kpiData">--</strong>
+      </div>
+      <div class="kpi">
+        <span>Turno</span>
+        <strong id="kpiTurno">--</strong>
+      </div>
+      <div class="kpi">
+        <span>Risco</span>
+        <strong id="kpiRisco">--</strong>
+      </div>
+    </div>
+
+    <br>
+
+    <button class="btn-azul" onclick="irPara('programacao')">Começar preenchimento</button>
+  </div>
+</section>
+
+<section id="programacao" class="tela">
+  <div class="card">
+    <h2>📌 Programação</h2>
+
+    <div class="grid">
+      <div>
+        <label>Data da Programação</label>
+        <input type="date" id="dataProgramacao">
+      </div>
+
+      <div>
+        <label>Turno</label>
+        <select id="turno">
+          <option>1º Turno</option>
+          <option>2º Turno</option>
+          <option>Troca de Turno</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div>
+        <label>Total de Linhas</label>
+        <input type="number" id="linhas" placeholder="Ex: 538">
+      </div>
+      <div>
+        <label>Total de Peso</label>
+        <input type="number" id="peso" placeholder="Ex: 59910">
+      </div>
+    </div>
+
+    <div class="grid">
+      <div>
+        <label>Total de Litros</label>
+        <input type="number" id="litros" placeholder="Ex: 52009">
+      </div>
+      <div>
+        <label>Risco da Operação</label>
+        <select id="risco">
+          <option>Sem risco</option>
+          <option>Atenção</option>
+          <option>Crítico</option>
+        </select>
+      </div>
+    </div>
+
+    <label>Status da Operação</label>
+    <textarea id="statusOperacao">Sem riscos de atendimento.</textarea>
+
+    <label>Exportação / Observações</label>
+    <textarea id="exportacao" placeholder="Ex: Estamos preparando uma carga de exportação..."></textarea>
+
+    <label>Observação</label>
+    <textarea id="observacao" placeholder="Ex: Estamos separando também o material de descarte."></textarea>
+
+    <br><br>
+    <button class="btn-azul" onclick="irPara('maoobra')">Próximo</button>
+  </div>
+</section>
+
+<section id="maoobra" class="tela">
+  <div class="card">
+    <h2>👷 Mão de Obra</h2>
+
+    <div id="listaMaoObra"></div>
+
+    <button class="btn-azul" onclick="adicionarColaborador()">+ Adicionar colaborador</button>
+    <br><br>
+    <button class="btn-verde" onclick="irPara('armazem')">Próximo</button>
+  </div>
+</section>
+
+<section id="armazem" class="tela">
+  <div class="card">
+    <h2>🏭 Situação do Armazém</h2>
+
+    <div class="grid">
+      <div>
+        <label>Posições vazias na expedição</label>
+        <input type="number" id="posExpedicao" value="0">
+      </div>
+      <div>
+        <label>Posições vazias no porta-palete</label>
+        <input type="number" id="posPortaPalete" value="0">
+      </div>
+    </div>
+
+    <div class="grid">
+      <div>
+        <label>Paletes para receber e guardar</label>
+        <input type="number" id="paletesReceber" value="0">
+      </div>
+      <div>
+        <label>Espaço no pulmão da fábrica</label>
+        <input type="number" id="espacoPulmao" value="0">
+      </div>
+    </div>
+
+    <label>Baias da expedição em uso</label>
+    <input type="number" id="baias" value="0">
+
+    <br><br>
+    <button class="btn-verde" onclick="irPara('pendencias')">Próximo</button>
+  </div>
+</section>
+
+<section id="pendencias" class="tela">
+  <div class="card">
+    <h2>🚚 Pendências de Coleta</h2>
+
+    <div id="listaPendencias"></div>
+
+    <button class="btn-azul" onclick="adicionarPendencia()">+ Adicionar pendência</button>
+
+    <br><br>
+    <button class="btn-verde" onclick="gerarStatus(); irPara('resultadoTela')">Gerar Status</button>
+  </div>
+</section>
+
+<section id="resultadoTela" class="tela">
+  <div class="card">
+    <h2>📧 Resultado / Enviar</h2>
+
+    <div class="acoes">
+      <button class="btn-verde" onclick="gerarStatus()">Gerar Status</button>
+      <button class="btn-roxo" onclick="enviarEmail()">Abrir E-mail</button>
+      <button class="btn-cinza" onclick="copiarStatus()">Copiar Texto</button>
+    </div>
+
+    <br>
+
+    <button class="btn-vermelho" onclick="limparTudo()">Limpar Tudo</button>
+  </div>
+
+  <div class="card">
+    <h2>Status Gerado</h2>
+    <div id="resultado"></div>
+  </div>
+</section>
+
+</main>
+
+<script>
+const destinatarios =
+"emerson@mtclog.com.br;jurandir@mtclog.com.br;AndreLopes.Silva@akzonobel.com;carlos.ribeiro1@akzonobel.com;denner@mtclog.com.br;Mariana.Toledo@akzonobel.com;WILLIAM.MARQUES@akzonobel.com;Douglas.MTC@akzonobel.com";
+
+const colaboradoresPadrao = [
+  ["Jhuan", "Separação", "Presente", ""],
+  ["Jean", "Separação", "Presente", ""],
+  ["Izabelly", "Separação / Observação", "Presente", ""],
+  ["Edvan", "Separação / Observação", "Presente", ""],
+  ["Pedro", "Expedição", "Presente", ""],
+  ["Andre", "Entrará mais tarde", "Presente", ""]
+];
+
+function abrirTela(id, botao){
+  document.querySelectorAll(".tela").forEach(t => t.classList.remove("ativa"));
+  document.getElementById(id).classList.add("ativa");
+
+  document.querySelectorAll("nav button").forEach(b => b.classList.remove("ativo"));
+  if(botao) botao.classList.add("ativo");
+
+  atualizarKPIs();
+  window.scrollTo(0,0);
+}
+
+function irPara(id){
+  const botoes = document.querySelectorAll("nav button");
+  const mapa = {
+    home:0,
+    programacao:1,
+    maoobra:2,
+    armazem:3,
+    pendencias:4,
+    resultadoTela:5
+  };
+  abrirTela(id, botoes[mapa[id]]);
+}
+
+function hojeISO(){
+  const hoje = new Date();
+  return hoje.toISOString().split("T")[0];
+}
+
+function dataBR(dataISO){
+  if(!dataISO) return "";
+  const [ano, mes, dia] = dataISO.split("-");
+  return `${dia}/${mes}`;
+}
+
+function identificarTurno(){
+  const agora = new Date();
+  const minutos = agora.getHours() * 60 + agora.getMinutes();
+
+  if(minutos >= 360 && minutos < 936) return "1º Turno";
+  if(minutos >= 936 && minutos <= 948) return "Troca de Turno";
+  return "2º Turno";
+}
+
+function atualizarKPIs(){
+  document.getElementById("kpiData").textContent = dataBR(document.getElementById("dataProgramacao").value);
+  document.getElementById("kpiTurno").textContent = document.getElementById("turno").value;
+  document.getElementById("kpiRisco").textContent = document.getElementById("risco").value;
+}
+
+function adicionarColaborador(nome="", atividade="", presenca="Presente", observacao=""){
+  const div = document.createElement("div");
+  div.className = "linha";
+
+  div.innerHTML = `
+    <input placeholder="Colaborador" value="${nome}">
+    <input placeholder="Atividade" value="${atividade}">
+    <select>
+      <option ${presenca==="Presente"?"selected":""}>Presente</option>
+      <option ${presenca==="Falta"?"selected":""}>Falta</option>
+      <option ${presenca==="Férias"?"selected":""}>Férias</option>
+      <option ${presenca==="Folga"?"selected":""}>Folga</option>
+      <option ${presenca==="Atrasado"?"selected":""}>Atrasado</option>
+      <option ${presenca==="Afastado"?"selected":""}>Afastado</option>
+    </select>
+    <input placeholder="Observação" value="${observacao}">
+    <button class="btn-vermelho" onclick="this.parentElement.remove()">X</button>
+  `;
+
+  document.getElementById("listaMaoObra").appendChild(div);
+}
+
+function adicionarPendencia(transportadora="", horario="", problema="", paletes=""){
+  const div = document.createElement("div");
+  div.className = "linha-pendencia";
+
+  div.innerHTML = `
+    <input placeholder="Transportadora" value="${transportadora}">
+    <input placeholder="Horário" value="${horario}">
+    <input placeholder="Problema" value="${problema}">
+    <input type="number" placeholder="Paletes" value="${paletes}">
+    <button class="btn-vermelho" onclick="this.parentElement.remove()">X</button>
+  `;
+
+  document.getElementById("listaPendencias").appendChild(div);
+}
+
+function validarCampos(){
+  const avisos = [];
+
+  if(!document.getElementById("linhas").value) avisos.push("- Total de linhas não informado");
+  if(!document.getElementById("peso").value) avisos.push("- Total de peso não informado");
+  if(!document.getElementById("litros").value) avisos.push("- Total de litros não informado");
+  if(!document.getElementById("statusOperacao").value.trim()) avisos.push("- Status da operação não informado");
+  if(!document.getElementById("espacoPulmao").value) avisos.push("- Espaço no pulmão não informado");
+
+  if(avisos.length > 0){
+    return confirm("Existem informações faltando:\n\n" + avisos.join("\n") + "\n\nDeseja continuar mesmo assim?");
+  }
+
+  return true;
+}
+
+function gerarStatus(){
+  if(!validarCampos()) return "";
+
+  const data = dataBR(document.getElementById("dataProgramacao").value);
+  const turno = document.getElementById("turno").value;
+  const risco = document.getElementById("risco").value;
+
+  const linhas = document.getElementById("linhas").value || "0";
+  const peso = document.getElementById("peso").value || "0";
+  const litros = document.getElementById("litros").value || "0";
+
+  const statusOperacao = document.getElementById("statusOperacao").value.trim();
+  const exportacao = document.getElementById("exportacao").value.trim();
+  const observacao = document.getElementById("observacao").value.trim();
+
+  const posExpedicao = document.getElementById("posExpedicao").value || "0";
+  const posPortaPalete = document.getElementById("posPortaPalete").value || "0";
+  const paletesReceber = document.getElementById("paletesReceber").value || "0";
+  const espacoPulmao = document.getElementById("espacoPulmao").value || "0";
+  const baias = document.getElementById("baias").value || "0";
+
+  const saudacao = turno === "1º Turno" ? "Bom dia !" : "Boa tarde !";
+
+  let maoTexto = "";
+  let faltas = [];
+  let afastados = [];
+
+  document.querySelectorAll("#listaMaoObra .linha").forEach(linha => {
+    const campos = linha.querySelectorAll("input, select");
+    const nome = campos[0].value.trim();
+    const atividade = campos[1].value.trim();
+    const presenca = campos[2].value;
+    const obs = campos[3].value.trim();
+
+    if(!nome) return;
+
+    if(presenca === "Presente"){
+      maoTexto += `${nome} - ${atividade}${obs ? " (" + obs + ")" : ""}\n`;
+    } else if(presenca === "Atrasado"){
+      maoTexto += `${nome} - ${atividade} (Atrasado${obs ? " - " + obs : ""})\n`;
+    } else if(presenca === "Falta"){
+      faltas.push(nome);
+    } else {
+      afastados.push(`${nome} - ${presenca}${obs ? " (" + obs + ")" : ""}`);
+    }
+  });
+
+  let pendTexto = "";
+  let qtdPend = 0;
+
+  document.querySelectorAll("#listaPendencias .linha-pendencia").forEach(linha => {
+    const campos = linha.querySelectorAll("input");
+    const transportadora = campos[0].value.trim();
+    const horario = campos[1].value.trim();
+    const problema = campos[2].value.trim();
+    const paletes = campos[3].value.trim();
+
+    if(!transportadora) return;
+
+    qtdPend++;
+    pendTexto += `${transportadora} ${horario}`;
+
+    if(problema) pendTexto += ` - ${problema}`;
+    if(paletes && Number(paletes) > 0) pendTexto += `, ${paletes} paletes`;
+
+    pendTexto += "\n";
+  });
+
+  if(!pendTexto) pendTexto = "Sem pendências de coleta.";
+
+  let alertas = "";
+
+  if(Number(posExpedicao) === 0) alertas += "Atenção: expedição sem posições vazias disponíveis.\n";
+  if(Number(posPortaPalete) === 0) alertas += "Atenção: porta-palete sem posições vazias disponíveis.\n";
+  if(Number(paletesReceber) >= 80) alertas += "Alto volume de paletes pendentes para receber e guardar.\n";
+  if(Number(espacoPulmao) <= 15) alertas += "Pulmão da fábrica com baixa capacidade disponível.\n";
+
+  let texto = "";
+
+  texto += `${saudacao}\n\n`;
+  texto += `Segue status inicial - ${turno}.\n\n`;
+  texto += `📌 Programação do dia ${data}\n\n`;
+  texto += `Total de linhas: ${Number(linhas).toLocaleString("pt-BR")}\n`;
+  texto += `Total de peso: ${Number(peso).toLocaleString("pt-BR")}\n`;
+  texto += `Total de litros: ${Number(litros).toLocaleString("pt-BR")}\n\n`;
+
+  texto += `Status da Operação:\n\n`;
+  texto += `Risco: ${risco}\n`;
+  texto += `${statusOperacao}\n\n`;
+
+  if(exportacao) texto += `${exportacao}\n\n`;
+  if(observacao) texto += `${observacao}\n\n`;
+
+  texto += `👷‍♂️ Divisão de mão de obra para hoje\n\n`;
+  texto += maoTexto ? `${maoTexto}\n` : "Nenhum colaborador presente informado.\n\n";
+
+  texto += `📋 Faltas ${faltas.length}\n`;
+  texto += faltas.length > 0 ? `${faltas.join("/")}\n\n` : "Sem faltas\n\n";
+
+  if(afastados.length > 0){
+    texto += `Colaboradores fora da operação:\n`;
+    texto += `${afastados.join("\n")}\n\n`;
+  }
+
+  texto += `🏭 Situação do Armazém\n\n`;
+  texto += `Posições vazias na expedição: (${posExpedicao})\n\n`;
+  texto += `Posições vazias no porta-palete: (${posPortaPalete})\n\n`;
+  texto += `${paletesReceber} paletes para receber e guardar\n\n`;
+
+  if(Number(baias) > 0){
+    texto += `Já estamos usando novamente ${baias} baias da expedição.\n\n`;
+  }
+
+  texto += `No pulmão da fábrica temos espaço para apenas mais ${espacoPulmao} paletes a serem produzidos.\n\n`;
+
+  if(alertas) texto += `${alertas}\n`;
+
+  texto += `🚚 Pendência de Coleta (${qtdPend})\n\n`;
+  texto += pendTexto;
+
+  document.getElementById("resultado").textContent = texto;
+  salvarLocal();
+
+  return texto;
+}
+
+async function copiarStatus(){
+  const texto = document.getElementById("resultado").textContent;
+
+  if(!texto.trim()){
+    alert("Gere o status antes de copiar.");
+    return;
+  }
+
+  await navigator.clipboard.writeText(texto);
+  alert("Status copiado com sucesso.");
+}
+
+function enviarEmail(){
+  const texto = document.getElementById("resultado").textContent || gerarStatus();
+
+  if(!texto || !texto.trim()){
+    alert("Gere o status antes de enviar.");
+    return;
+  }
+
+  const turno = document.getElementById("turno").value;
+  const data = document.getElementById("dataProgramacao").value;
+  const assunto = `Status Inicial da Operação - ${dataBR(data)} - ${turno}`;
+
+  const link =
+    `mailto:${destinatarios}` +
+    `?subject=${encodeURIComponent(assunto)}` +
+    `&body=${encodeURIComponent(texto)}`;
+
+  window.location.href = link;
+}
+
+function limparTudo(){
+  if(!confirm("Deseja limpar todas as informações?")) return;
+
+  document.querySelectorAll("input, textarea").forEach(campo => {
+    if(campo.type === "date") return;
+    campo.value = "";
+  });
+
+  document.getElementById("statusOperacao").value = "Sem riscos de atendimento.";
+  document.getElementById("posExpedicao").value = "0";
+  document.getElementById("posPortaPalete").value = "0";
+  document.getElementById("paletesReceber").value = "0";
+  document.getElementById("espacoPulmao").value = "0";
+  document.getElementById("baias").value = "0";
+
+  document.getElementById("listaMaoObra").innerHTML = "";
+  document.getElementById("listaPendencias").innerHTML = "";
+  document.getElementById("resultado").textContent = "";
+
+  colaboradoresPadrao.forEach(c => adicionarColaborador(...c));
+  salvarLocal();
+}
+
+function salvarLocal(){
+  const dados = {
+    dataProgramacao: document.getElementById("dataProgramacao").value,
+    turno: document.getElementById("turno").value,
+    risco: document.getElementById("risco").value,
+    linhas: document.getElementById("linhas").value,
+    peso: document.getElementById("peso").value,
+    litros: document.getElementById("litros").value,
+    statusOperacao: document.getElementById("statusOperacao").value,
+    exportacao: document.getElementById("exportacao").value,
+    observacao: document.getElementById("observacao").value,
+    posExpedicao: document.getElementById("posExpedicao").value,
+    posPortaPalete: document.getElementById("posPortaPalete").value,
+    paletesReceber: document.getElementById("paletesReceber").value,
+    espacoPulmao: document.getElementById("espacoPulmao").value,
+    baias: document.getElementById("baias").value
+  };
+
+  localStorage.setItem("statusInicialSBC", JSON.stringify(dados));
+}
+
+function carregarLocal(){
+  const salvo = localStorage.getItem("statusInicialSBC");
+
+  if(!salvo) return;
+
+  const d = JSON.parse(salvo);
+
+  Object.keys(d).forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = d[id];
+  });
+}
+
+window.onload = function(){
+  document.getElementById("dataProgramacao").value = hojeISO();
+  document.getElementById("turno").value = identificarTurno();
+
+  carregarLocal();
+
+  if(document.getElementById("listaMaoObra").children.length === 0){
+    colaboradoresPadrao.forEach(c => adicionarColaborador(...c));
+  }
+
+  atualizarKPIs();
+
+  document.querySelectorAll("input, textarea, select").forEach(el => {
+    el.addEventListener("change", salvarLocal);
+  });
+};
+</script>
+
+</body>
+</html>
